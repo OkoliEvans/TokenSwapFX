@@ -42,7 +42,7 @@ contract LiquidityPool is ExchangeRate {
         address _tokenB, 
         int256 _amountInTokenA, 
         int256 _amountInTokenB
-    ) external returns(bool success1, bool success2)/** WHY SUCCESS1 & SUCCESS2? */{
+    ) external returns(bool success1, bool success2, address pair_Address)/** WHY SUCCESS1 & SUCCESS2? */{
         address pairAddress = getPair(_tokenA,_tokenB) == address(0)? createPair(_tokenA,_tokenB) : getPair(_tokenA,_tokenB) ;
             string memory _tokenASymbol = IERC20Metadata(_tokenA).symbol();
             string memory _tokenBSymbol = IERC20Metadata(_tokenB).symbol();
@@ -71,25 +71,27 @@ contract LiquidityPool is ExchangeRate {
 
             require (success1 && success2, "Failed to add liquidity!");
         }
+        pair_Address = pairAddress;
     }
 
         function removeLiquidity(
             address _tokenA,
             address _tokenB,
             address _to,
-            uint _amount
+            uint _amountTokenA,
+            uint _amountTokenB
         ) internal returns(bool success1, bool success2) {
             address pairAddress = getPair(_tokenA, _tokenB);
             //require(pairAddress, "Liquidity pool not available");
-            IERC20(_tokenA).transferFrom(
+            success1 = IERC20(_tokenA).transferFrom(
                 pairAddress,
                 _to,
-                _amount   
+                _amountTokenA   
             );
-            IERC20(_tokenB).transferFrom(
+            success2 = IERC20(_tokenB).transferFrom(
                 pairAddress,
                 _to,
-                _amount
+                _amountTokenB
             );
             require(success1 && success2, "Operation failed");
     }

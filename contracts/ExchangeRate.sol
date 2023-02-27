@@ -58,9 +58,9 @@ contract ExchangeRate is Ownable {
         uint8 _decimals
     ) internal pure returns (int256) {
         if (_priceDecimals < _decimals) {
-            return _price * int256(10 ** uint256(_decimals - _priceDecimals));
+            return _price * int256(10 ** uint256(_decimals - _priceDecimals) / _decimals);
         } else if (_priceDecimals > _decimals) {
-            return _price / int256(10 ** uint256(_priceDecimals - _decimals));
+            return _price / int256(10 ** uint256(_priceDecimals - _decimals) / _decimals);
         }
         return _price;
     }

@@ -18,6 +18,7 @@
   "homepage": "https://github.com/OkoliEvans/TokenSwapFX#readme",
   "dependencies": {
     "@chainlink/contracts": "^0.6.1",
+    "@nomicfoundation/hardhat-network-helpers": "^1.0.8",
     "@openzeppelin/contracts": "^4.8.1",
     "dotenv": "^16.0.3"
   },
