@@ -8,16 +8,28 @@ pragma solidity ^0.8.7;
 /// @author Okoli Evans
 /// @notice This gets the exchange rate of two Tokens
 
-import { ERC20 , IERC20 } from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import { IERC20Metadata } from "@openzeppelin/contracts/interfaces/IERC20Metadata.sol";
 import { ExchangeRate } from "./ExchangeRate.sol";
+// import "@opengsn/contracts/src/ERC2771Recipient.sol";
+import "@openzeppelin/contracts/metatx/ERC2771Context.sol";
 
 
-contract LiquidityPool is ExchangeRate {
+contract LiquidityPool is ExchangeRate, ERC2771Context {
 
-    address private SWAP_ROUTER;
+    address private trustedForwarder;
 
     mapping (bytes32 => address) private PairFactory;
+
+    constructor(address _trustedForwarder) {
+        trustedForwarder = _trustedForwarder;
+    }
+
+
+     function versionRecipient() external view returns (string memory) {
+        return "1";
+     }
 
     function createPair(address _tokenA, address _tokenB) internal returns (address) {
         require(_tokenA != address(0) && _tokenB != address(0));
@@ -57,12 +69,12 @@ contract LiquidityPool is ExchangeRate {
 
         if (_amountInTokenB >= rateOfB) {
             IERC20(_tokenA).transferFrom(
-                msg.sender,
+                _msg.sender(),
                 pairAddress,
                 uint256(_amountInTokenA
             ));
             IERC20(_tokenB).transferFrom(
-                msg.sender,
+                _msg.sender(),
                 pairAddress,
                 uint256(rateOfB));
 
@@ -104,7 +116,7 @@ contract LiquidityPool is ExchangeRate {
             address _buyer
         ) public returns(bool success) {
             require(_tokenA != address(0) && _tokenB != address(0), "Invalid address");
-            require(uint(_amountToSwap) <= IERC20(_tokenA).balanceOf(msg.sender), "Insufficient Balance");
+            require(uint(_amountToSwap) <= IERC20(_tokenA).balanceOf(_msg.sender()), "Insufficient Balance");
             string memory _tokenASymbol = IERC20Metadata(_tokenA).symbol();
             string memory _tokenBSymbol = IERC20Metadata(_tokenB).symbol();
             uint8 _tokenBDecimals = IERC20Metadata(_tokenB).decimals();
@@ -119,7 +131,7 @@ contract LiquidityPool is ExchangeRate {
             require(IERC20(_tokenB).balanceOf(pairAddress) >= amountOut, "try again shortly");
             
             IERC20(_tokenA).transferFrom(
-                msg.sender,
+                _msg.sender(),
                 pairAddress,
                 uint(_amountToSwap)
             );

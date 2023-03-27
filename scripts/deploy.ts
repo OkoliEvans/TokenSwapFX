@@ -4,9 +4,9 @@ async function main() {
   const [owner, account1] = await ethers.getSigners();
 
   ////////////////////  DEPLOY  LIQUIDITY POOL  /////////////////////////
-
+  const trustForwarder = "0xE041608922d06a4F26C0d4c27d8bCD01daf1f792";
   const LiquidityPool = await ethers.getContractFactory("LiquidityPool");
-  const liquidityPool = await LiquidityPool.deploy();
+  const liquidityPool = await LiquidityPool.deploy(trustForwarder);
   await liquidityPool.deployed();
 
   console.log(`Liquidity pool deployed to: ${liquidityPool.address}`);
